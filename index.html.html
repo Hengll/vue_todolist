@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>list</title>
+</head>
+
+<body>
+  <div id="app">
+    <form @submit.prevent="addItem">
+      <input type="text" v-model="input" :style="{ border : inputBorder }">
+      <input type="submit" value="新增">
+    </form>
+    <hr>
+    <input type="button" value="全部標記已完成" @click="doneAll">
+    <input type="button" value="全部標記未完成" @click="undoneAll"><br>
+    <input type="button" value="顯示全部" @click="filterRule = '全部'">
+    <input type="button" value="顯示已完成" @click="filterRule = '已完成'">
+    <input type="button" value="顯示未完成" @click="filterRule = '未完成'"><br>
+    <input type="button" value="清除全部" @click="delAll">
+    <input type="button" value="清除已完成" @click="delDone">
+    <input type="button" value="清除未完成" @click="delUndone"><br>
+    <hr>
+    <p>目前顯示 : {{ filterRule }}，共 {{ filterItems.length }} 個</p>
+    <ul>
+      <li v-for="item in filterItems">
+        <input type="button" value="x" @click="delId(item.id)">
+        <input type="checkbox" v-model="item.done">
+        <del v-if="item.done">{{ item.text }}</del>
+        <template v-else>
+          <input v-if="item.isEdit" type="text" @keydown.esc="escEdit(item)" @keydown.enter="enterEdit(item)"
+            v-model="item.editInput">
+          <span v-else @dblclick="item.isEdit = true">{{ item.text }}</span>
+        </template>
+      </li>
+    </ul>
+    <hr>
+    <p>點兩下編輯清單文字，ESC取消編輯</p>
+  </div>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script>
+    const { ref, reactive, computed, watch, onMounted } = Vue
+    Vue.createApp({
+      setup() {
+        const input = ref('')
+        const items = reactive([])
+        const filterRule = ref('全部')
+        let id = 1
+
+        const inputBorder = computed(() => {
+          if (input.value.length === 0) return ''
+          else if (input.value.length < 3) return '5px solid red'
+          else return '5px solid blue'
+        })
+
+        const addItem = () => {
+          if (input.value.length < 3) return
+          items.push({
+            text: input.value,
+            done: false,
+            id: id++,
+            isEdit: false,
+            editInput: input.value
+          })
+          input.value = ''
+        }
+
+        const filterItems = computed(() => {
+          return items.filter((val) => {
+            if (filterRule.value === '全部') return true
+            else if (filterRule.value === '已完成' && val.done) return true
+            else if (filterRule.value === '未完成' && !val.done) return true
+          })
+        })
+
+        const escEdit = (item) => {
+          item.editInput = item.text
+          item.isEdit = false
+        }
+
+        const enterEdit = (item) => {
+          if (item.editInput.length > 2) {
+            item.text = item.editInput
+            item.isEdit = false
+          }
+        }
+
+        const delId = (id) => {
+          const i = items.findIndex(item => {
+            return item.id === id
+          })
+          items.splice(i, 1)
+        }
+
+        const delAll = () => {
+          items.splice(0, items.length)
+        }
+
+        const delDone = () => {
+          for (let i = items.length - 1; i >= 0; i--) {
+            if (items[i].done) items.splice(i, 1)
+          }
+        }
+
+        const delUndone = () => {
+          for (let i = items.length - 1; i >= 0; i--) {
+            if (!items[i].done) items.splice(i, 1)
+          }
+        }
+
+        const doneAll = () => {
+          items.forEach(element => {
+            element.done = true
+          })
+        }
+
+        const undoneAll = () => {
+          items.forEach(element => {
+            element.done = false
+          })
+        }
+
+        watch(items, () => {
+          localStorage.vueList = JSON.stringify(items)
+        })
+
+        onMounted(() => {
+          const json = JSON.parse(localStorage.vueList || '[]')
+          items.splice(0, 0, ...json)
+          if (items.length > 0) {
+            id = items[items.length - 1].id + 1
+          }
+        })
+
+        return {
+          input, items, filterRule, filterItems, inputBorder, addItem, delId, enterEdit, escEdit, doneAll, undoneAll, delAll, delDone, delUndone
+        }
+      }
+    }).mount('#app')
+  </script>
+</body>
+
+</html>
