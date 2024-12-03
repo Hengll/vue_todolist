@@ -25,7 +25,7 @@
     <hr>
     <p>目前顯示 : {{ filterRule }}，共 {{ filterItems.length }} 個</p>
     <ul>
-      <li v-for="item in filterItems">
+      <li v-for="item in filterItems" :key="item.id">
         <input type="button" value="x" @click="delId(item.id)">
         <input type="checkbox" v-model="item.done">
         <del v-if="item.done">{{ item.text }}</del>
