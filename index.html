@@ -5,138 +5,245 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>list</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playwrite+DK+Loopet:wght@100..400&display=swap" rel="stylesheet">
+
+  <style>
+    .title {
+      font-size: 6rem;
+      font-family: "Playwrite DK Loopet", cursive;
+      font-optical-sizing: auto;
+      font-style: normal;
+      font-weight: 400;
+    }
+  </style>
 </head>
 
 <body>
   <div id="app">
-    <form @submit.prevent="addItem">
-      <input type="text" v-model="input" :style="{ border : inputBorder }">
-      <input type="submit" value="新增">
-    </form>
-    <hr>
-    <input type="button" value="全部標記已完成" @click="doneAll">
-    <input type="button" value="全部標記未完成" @click="undoneAll"><br>
-    <input type="button" value="顯示全部" @click="filterRule = '全部'">
-    <input type="button" value="顯示已完成" @click="filterRule = '已完成'">
-    <input type="button" value="顯示未完成" @click="filterRule = '未完成'"><br>
-    <input type="button" value="清除全部" @click="delAll">
-    <input type="button" value="清除已完成" @click="delDone">
-    <input type="button" value="清除未完成" @click="delUndone"><br>
-    <hr>
-    <p>目前顯示 : {{ filterRule }}，共 {{ filterItems.length }} 個</p>
-    <ul>
-      <li v-for="item in filterItems" :key="item.id">
-        <input type="button" value="x" @click="delId(item.id)">
-        <input type="checkbox" v-model="item.done">
-        <del v-if="item.done">{{ item.text }}</del>
-        <template v-else>
-          <input v-if="item.isEdit" type="text" @keydown.esc="escEdit(item)" @keydown.enter="enterEdit(item)"
-            v-model="item.editInput">
-          <span v-else @dblclick="item.isEdit = true">{{ item.text }}</span>
-        </template>
-      </li>
-    </ul>
-    <hr>
-    <p>點兩下編輯清單文字，ESC取消編輯</p>
+    <div class="container d-flex justify-content-center">
+      <div class="border col-12 col-md-10 col-xl-8 mt-5 p-4 bg-light rounded">
+        <!-- 標題 -->
+        <div class="text-center mb-4">
+          <h1 class="title">To-do list</h1>
+        </div>
+
+        <!-- 輸入區 + 按鈕區 -->
+        <div class="row g-3">
+          <!-- 輸入區 -->
+          <div class="col-md-6">
+            <form @submit.prevent="addItem" class="d-flex justify-content-center align-items-center">
+              <input type="text" class="form-control me-2" v-model="input" :style="{ outline : inputBorder }">
+              <input type="submit" class="btn btn-primary" value="新增">
+            </form>
+          </div>
+
+          <!-- 按鈕區 -->
+          <div class="col-md-6 d-flex flex-column align-items-center">
+            <!-- 標記 -->
+            <div class="mb-2 d-flex align-items-center gap-2">
+              <span class="fw-bold">標記：</span>
+              <button class="btn btn-outline-success btn-sm" @click="doneAll">全部已完成</button>
+              <button class="btn btn-outline-success btn-sm" @click="undoneAll">全部未完成</button>
+            </div>
+
+            <!-- 清除 -->
+            <div class="d-flex align-items-center gap-2">
+              <span class="fw-bold">清除：</span>
+              <button class="btn btn-outline-danger btn-sm" @click="delAll">全部</button>
+              <button class="btn btn-outline-danger btn-sm" @click="delDone">已完成</button>
+              <button class="btn btn-outline-danger btn-sm" @click="delUndone">未完成</button>
+            </div>
+          </div>
+        </div>
+
+        <hr>
+
+        <!-- 篩選與提示 -->
+        <div class="mt-3">
+          <div class="btn-group mb-2" role="group" aria-label="Filter options">
+            <input type="radio" class="btn-check" name="filter" id="showAll" autocomplete="off"
+              @click="filterRule = '全部'" checked>
+            <label class="btn btn-outline-primary" for="showAll">顯示全部</label>
+
+            <input type="radio" class="btn-check" name="filter" id="showDone" autocomplete="off"
+              @click="filterRule = '已完成'">
+            <label class="btn btn-outline-primary" for="showDone">顯示已完成</label>
+
+            <input type="radio" class="btn-check" name="filter" id="showUndone" autocomplete="off"
+              @click="filterRule = '未完成'">
+            <label class="btn btn-outline-primary" for="showUndone">顯示未完成</label>
+          </div>
+
+          <p class="mb-2">目前顯示：{{ filterRule }}，共 {{ filterItems.length }} 個</p>
+          <p class="text-muted">點兩下編輯清單文字，ESC 取消編輯</p>
+        </div>
+
+        <!-- 清單區 -->
+        <ul class="list-group">
+          <li class="list-group-item d-flex align-items-center justify-content-between" v-for="item in filterItems"
+            :key="item.id">
+            <div>
+              <input type="checkbox" class="form-check-input me-2" v-model="item.done">
+              <del v-if="item.done">{{ item.text }}</del>
+              <template v-else>
+                <input v-if="item.isEdit" type="text" class="form-control d-inline w-auto" @keydown.esc="escEdit(item)"
+                  @keydown.enter="enterEdit(item)" v-model="item.editInput">
+                <span v-else @dblclick="item.isEdit = true">{{ item.text }}</span>
+              </template>
+            </div>
+            <button class="btn btn-sm btn-outline-danger" @click="delId(item.id)">x</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
   </div>
+  <script src="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <script>
     const { ref, reactive, computed, watch, onMounted } = Vue
+
+    class Task {
+      constructor(text, id) {
+        this.text = text
+        this.done = false
+        this.id = id
+        this.isEdit = false
+        this.editInput = text
+      }
+
+      toggleDone() {
+        this.done = !this.done
+      }
+
+      startEdit() {
+        this.isEdit = true
+      }
+
+      cancelEdit() {
+        this.editInput = this.text
+        this.isEdit = false
+      }
+
+      confirmEdit() {
+        if (this.editInput.length > 2) {
+          this.text = this.editInput
+          this.isEdit = false
+        }
+      }
+    }
+
+    class TaskManager {
+      constructor() {
+        this.tasks = reactive([])
+        this.nextId = 1
+      }
+
+      add(text) {
+        if (text.length < 3) return
+        this.tasks.push(new Task(text, this.nextId++))
+      }
+
+      removeById(id) {
+        const index = this.tasks.findIndex(t => t.id === id)
+        if (index !== -1) this.tasks.splice(index, 1)
+      }
+
+      clearAll() {
+        this.tasks.splice(0)
+      }
+
+      clearDone() {
+        for (let i = this.tasks.length - 1; i >= 0; i--) {
+          if (this.tasks[i].done) this.tasks.splice(i, 1)
+        }
+      }
+
+      clearUndone() {
+        for (let i = this.tasks.length - 1; i >= 0; i--) {
+          if (!this.tasks[i].done) this.tasks.splice(i, 1)
+        }
+      }
+
+      markAllDone() {
+        this.tasks.forEach(t => t.done = true)
+      }
+
+      markAllUndone() {
+        this.tasks.forEach(t => t.done = false)
+      }
+
+      getFiltered(rule) {
+        if (rule === '全部') return this.tasks;
+        if (rule === '已完成') return this.tasks.filter(t => t.done)
+        if (rule === '未完成') return this.tasks.filter(t => !t.done)
+      }
+
+      saveToLocalStorage() {
+        localStorage.vueList = JSON.stringify(this.tasks)
+      }
+
+      loadFromLocalStorage() {
+        const raw = JSON.parse(localStorage.vueList || '[]')
+        const restored = raw.map(obj => Object.assign(new Task(obj.text, obj.id), obj))
+        this.tasks.splice(0, 0, ...restored)
+        if (this.tasks.length > 0) {
+          this.nextId = this.tasks[this.tasks.length - 1].id + 1
+        }
+      }
+    }
+
     Vue.createApp({
       setup() {
         const input = ref('')
-        const items = reactive([])
         const filterRule = ref('全部')
-        let id = 1
+        const manager = new TaskManager()
 
         const inputBorder = computed(() => {
           if (input.value.length === 0) return ''
-          else if (input.value.length < 3) return '5px solid red'
-          else return '5px solid blue'
+          else if (input.value.length < 3) return '3px solid red'
+          else return '3px solid blue'
         })
 
+        const filterItems = computed(() => manager.getFiltered(filterRule.value))
+
         const addItem = () => {
-          if (input.value.length < 3) return
-          items.push({
-            text: input.value,
-            done: false,
-            id: id++,
-            isEdit: false,
-            editInput: input.value
-          })
+          manager.add(input.value)
           input.value = ''
         }
 
-        const filterItems = computed(() => {
-          return items.filter((val) => {
-            if (filterRule.value === '全部') return true
-            else if (filterRule.value === '已完成' && val.done) return true
-            else if (filterRule.value === '未完成' && !val.done) return true
-          })
-        })
+        const delId = id => manager.removeById(id)
+        const delAll = () => manager.clearAll()
+        const delDone = () => manager.clearDone()
+        const delUndone = () => manager.clearUndone()
+        const doneAll = () => manager.markAllDone()
+        const undoneAll = () => manager.markAllUndone()
 
-        const escEdit = (item) => {
-          item.editInput = item.text
-          item.isEdit = false
-        }
+        const escEdit = task => task.cancelEdit()
+        const enterEdit = task => task.confirmEdit()
 
-        const enterEdit = (item) => {
-          if (item.editInput.length > 2) {
-            item.text = item.editInput
-            item.isEdit = false
-          }
-        }
+        watch(manager.tasks, () => manager.saveToLocalStorage(), { deep: true })
 
-        const delId = (id) => {
-          const i = items.findIndex(item => {
-            return item.id === id
-          })
-          items.splice(i, 1)
-        }
-
-        const delAll = () => {
-          items.splice(0, items.length)
-        }
-
-        const delDone = () => {
-          for (let i = items.length - 1; i >= 0; i--) {
-            if (items[i].done) items.splice(i, 1)
-          }
-        }
-
-        const delUndone = () => {
-          for (let i = items.length - 1; i >= 0; i--) {
-            if (!items[i].done) items.splice(i, 1)
-          }
-        }
-
-        const doneAll = () => {
-          items.forEach(element => {
-            element.done = true
-          })
-        }
-
-        const undoneAll = () => {
-          items.forEach(element => {
-            element.done = false
-          })
-        }
-
-        watch(items, () => {
-          localStorage.vueList = JSON.stringify(items)
-        })
-
-        onMounted(() => {
-          const json = JSON.parse(localStorage.vueList || '[]')
-          items.splice(0, 0, ...json)
-          if (items.length > 0) {
-            id = items[items.length - 1].id + 1
-          }
-        })
+        onMounted(() => manager.loadFromLocalStorage())
 
         return {
-          input, filterRule, filterItems, inputBorder, addItem, delId, enterEdit, escEdit, doneAll, undoneAll, delAll, delDone, delUndone
-        }
+          input,
+          inputBorder,
+          filterRule,
+          filterItems,
+          addItem,
+          delId,
+          delAll,
+          delDone,
+          delUndone,
+          doneAll,
+          undoneAll,
+          escEdit,
+          enterEdit
+        };
       }
     }).mount('#app')
   </script>
