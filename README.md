@@ -1,6 +1,7 @@
 # vue_todolist
 
 [https://hengll.github.io/vue_todolist/](https://hengll.github.io/vue_todolist/)
+
 這是一個使用 Vue3 + Bootstrap5 製作的 todolist，支援基本的 CRUD 操作、篩選功能、本地儲存等功能，介面簡潔、操作直覺。
 
 ## 🚀 功能特色
@@ -38,4 +39,4 @@
 
 ## 🧪 預覽截圖（可自加）
 
-（![img](/img.PNG)
+![img](/img.PNG)
